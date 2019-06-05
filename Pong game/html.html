@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Simple Game</title>
+
+<style>
+ body {
+ margin: 0;
+ padding: 0;
+ height: 100vh;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ background-color: dimgray;
+ }
+ canvas {
+ border: 2px solid white;
+ }
+
+ #napis {
+ 	position: absolute;
+ 	top: 10px;
+ }
+ #pl1 {
+ 	position: absolute;
+ 	top: 200px;
+ 	left: 700px;
+ }
+
+  #pl2 {
+ 	position: absolute;
+ 	top: 200px;
+ 	left: 1150px;
+ }
+ #insert{
+ 	font-size: 100px;
+ 	color: red;
+ }
+ </style>
+
+
+
+<script> 
+
+var canvas;
+var ctx;
+var zmienna;
+var punkty1=0;
+var punkty2=0;
+
+const ballSize = 10; //promień piłki;
+const player1X = 20;
+let player1Y = 170;
+
+const player2X = 575;
+let player2Y = 170;
+
+const playerWidth = 10;
+const playerHeight = 60;
+
+let ballX = 300; //początkowe położenie x piłki to połowa szerokości canvas
+let ballY = 200;
+
+let ballSpeedX = 1; //wartość przykładowa, później może być nieco większa
+let ballSpeedY = 1; //wartość przykładowa, j.w.
+
+
+function init (){
+	canvas = document.getElementById('canv');
+	if (canvas.getContext){
+ 			ctx = canvas.getContext('2d')
+
+ 			table();
+ 			player1();
+ 			player2();
+ 			ball();
+ 			rightPaddle();
+ 		} 	
+
+ 	canvas.addEventListener('mousemove', playerPosition);
+ 	window.addEventListener('keydown',buttonClick);
+}
+
+
+function table() {
+	const cw = canvas.width;
+	const ch = canvas.height;
+	const linex = canvas.width/2;
+		 ctx.fillStyle = 'rgb(0,0,0)';
+		 ctx.fillRect(0, 0, cw, ch);
+
+
+		for (let linePosition = 10; linePosition < ch; linePosition += 15) {
+		 	ctx.fillStyle = 'rgb(255,255,255)';
+		 	ctx.fillRect(linex, linePosition, 2,8);
+		 }
+
+		 
+
+}
+
+function player1() {
+ 	
+ 		ctx.fillStyle = 'rgb(255, 215, 0)';
+ 		ctx.fillRect(player1X,player1Y,playerWidth,playerHeight);
+}
+
+function player2() {
+ 	
+ 		ctx.fillStyle = 'rgb(135, 206, 250)';
+ 		ctx.fillRect(player2X,player2Y,playerWidth,playerHeight);
+}
+
+
+function ball() {
+
+		 ctx.fillStyle = 'rgb(220, 20, 60)';
+			 ctx.beginPath();
+			 ctx.arc(ballX, ballY, ballSize, 0, Math.PI * 2, true);
+			 ctx.closePath();
+			 ctx.fill();
+
+
+			ballX += ballSpeedX;
+			ballY += ballSpeedY;
+
+			if (ballX <= 5 || ballX >= canvas.width-5) {
+ 				ballSpeedX = -ballSpeedX;
+ 				speedUp();
+ 			}
+ 			if (ballY<=5 || ballY >= canvas.height-5) {
+ 				ballSpeedY = -ballSpeedY;
+ 				speedUp();
+
+ 			}
+
+ 			if (ballX <= player1X + playerWidth && ballY > player1Y && ballY < player1Y + playerHeight){
+				ballSpeedX = -ballSpeedX;
+				punkty1 = punkty1 + 1;
+				document.getElementById("play1").innerHTML = punkty1;
+ 			}
+
+ 			if ( ballX >= player2X - playerWidth && ballY> player2Y && ballY < player2Y + playerHeight) {
+ 				ballSpeedX = -ballSpeedX;
+ 				punkty2 = punkty2 + 1;
+ 				document.getElementById("play2").innerHTML = punkty2;
+ 			}
+
+ 			if (ballX <= player1X - playerWidth ) {
+ 				punkty1 = 0;
+ 		
+ 				gameOver();
+ 				
+ 			}
+ 			if (ballX>=player2X+playerWidth) {
+ 				punkty2 = 0;
+ 				gameOver();
+ 				
+ 			}
+
+
+}
+
+//var topCanvas = canvas.offsetTop;
+
+function playerPosition(evt){
+
+	var posY = evt.clientY;
+	var top = canvas.offsetTop;
+	player1Y = posY - top;
+
+		if (player1Y <= 0){
+ 			player1Y = 0;
+		}
+
+		if(player1Y>=340) {
+			player1Y = 340;
+		}
+
+}  
+
+function speedUp(){
+
+	 if (ballSpeedX > 0 && ballSpeedX < 10){
+	 ballSpeedX += 0.2;
+	 }
+	 else if (ballSpeedX < 0 && ballSpeedX > -10){
+	 ballSpeedX -= 0.2;
+
+	 }
+
+	 if (ballSpeedY > 0 && ballSpeedY < 10){
+	 ballSpeedY += 0.2;
+	 }
+	 else if (ballSpeedY < 0 && ballSpeedY > -10){
+	 ballSpeedY -= 0.2;
+
+	 }
+
+ 
+ }
+
+
+function rightPaddle(){
+
+ var height = playerHeight/2;
+ var middlePaddle = player2Y + height;
+
+
+		 if (ballX > canvas.width / 2) {
+
+		 	if (middlePaddle - ballY > 200) {
+		 		player2Y -= 24;
+		 	} else if (middlePaddle - ballY > 50) {
+		 		player2Y -= 10;
+		 	}
+		
+		 	else if (middlePaddle - ballY < -200) {
+		 		player2Y += 24;
+			} else if (middlePaddle - ballY < -50) {
+		 		player2Y += 10;
+		 	}
+		 }
+
+
+		 if (ballX <= canvas.width/2 && ballX > 100) {
+			 if (middlePaddle - ballY > 100) {
+				 player2Y -= 3;
+			 }
+			 if (middlePaddle - ballY < -100) {
+			 	player2Y += 3;
+			 }
+		}
+
+		if (player2Y <= 0){
+ 			player2Y = 0;
+		}
+
+		if(player2Y>=340) {
+			player2Y = 340;
+		}
+}
+
+
+
+
+
+
+
+function gameOver(){
+		clearInterval(zmienna);
+		ballX = 300;
+ 		ballY = 200;
+ 		
+ 		
+ 		document.getElementById("insert").innerHTML = "Game Over";
+ 		
+	
+}
+
+
+
+
+function buttonClick(event) {
+
+	if(event.keyCode == 32) {
+		zmienna = setInterval(init, 1000/60); 
+	}
+
+	document.getElementById("insert").innerHTML = " ";
+
+	punkty1 = 0;
+	punkty2 = 0;
+	document.getElementById("play2").innerHTML = punkty2;
+ 	document.getElementById("play1").innerHTML = punkty1;
+}
+
+
+
+
+
+zmienna = setInterval(init, 1000/60); 
+
+
+
+</script>
+
+
+
+
+</head>
+<body onload="init();">
+
+<div id = "napis">
+<p id="insert"></p>
+</div>
+
+
+<div id = "pl1">
+	<p style="font-size: 20px; font-style: bold;color: yellow "> Gracz 1 </p>
+	<p id = "play1"></p>
+
+</div>
+
+
+<div id = "pl2">
+	<p style="font-size: 20px;font-style: bold;color: blue"> Gracz 2 </p>
+	      <p id = "play2"></p>
+
+</div>
+
+
+<canvas id="canv" width="600" height="400"></canvas>
+
+
+
+</body>
+</html>
